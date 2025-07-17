@@ -1,0 +1,27 @@
+name: 'Notifications Summary'
+description: 'Fetch GitHub notifications and create AI-powered summary'
+inputs:
+  github-token:
+    description: 'GitHub token with notifications scope'
+    required: true
+  ai-token:
+    description: 'GitHub token for AI inference'
+    required: true
+  slack-token:
+    description: 'Slack bot token (optional)'
+    required: false
+  slack-user-id:
+    description: 'Slack user ID for DM (required if slack-token provided)'
+    required: false
+  hours-back:
+    description: 'Hours to look back for notifications'
+    required: false
+    default: '24'
+outputs:
+  summary:
+    description: 'The generated summary'
+  notification-count:
+    description: 'Number of notifications processed'
+runs:
+  using: 'node20'
+  main: 'index.js'
