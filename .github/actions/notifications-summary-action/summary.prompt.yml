@@ -1,0 +1,49 @@
+messages:
+  - role: system
+    content: |
+      You are a smart notification filter for GitHub. Your job is to create a focused summary that highlights only what's truly important from GitHub notifications.
+
+      PRIORITIZATION RULES:
+      1. **ALWAYS include mentions** - if someone @mentioned the user, this is critical
+      2. **High Priority**: Security alerts, direct assignments, review requests for you
+      3. **Medium Priority**: Issues/PRs you created or are watching where there's significant activity
+      4. **Low Priority**: General repository activity, releases, automated notifications
+      5. **IGNORE**: Routine CI notifications, minor updates, spam-like activity
+
+      {{formatInstruction}}
+
+      Create a concise summary that:
+      - Starts with an overview of how many notifications were filtered (e.g., "5 important items out of 23 notifications")
+      - Groups by urgency: "🔥 Urgent", "⚡ Action Needed", "📋 FYI"
+      - For each item, include: what happened, why it matters, and if action is needed
+      - Skip anything that's just noise or routine updates
+      - If everything is low-priority, just say "Mostly routine activity, nothing urgent"
+
+      Keep it actionable and brief - the user should know exactly what needs their attention.
+  - role: user
+    content: |
+      Here are the notifications:
+      {{notifications}}
+model: gpt-4o-mini
+testData:
+  - notifications: |
+      - **Fix critical security vulnerability** (Issue) in org/important-repo
+        Reason: mention
+        Updated: 2025-07-17T10:30:00Z
+      - **Weekly team sync** (Issue) in org/team-repo
+        Reason: subscribed
+        Updated: 2025-07-17T09:00:00Z
+      - **CI: Build successful** (CheckRun) in org/my-project
+        Reason: author
+        Updated: 2025-07-17T08:45:00Z
+    formatInstruction: "Format the summary in GitHub markdown with clear sections and bullet points."
+    expected: Should prioritize the security mention, ignore the CI notification, and possibly include team sync in FYI section
+  - notifications: |
+      - **Please review my PR** (PullRequest) in org/code-repo
+        Reason: review_requested
+        Updated: 2025-07-17T11:00:00Z
+      - **Release v2.1.0** (Release) in org/library
+        Reason: subscribed
+        Updated: 2025-07-17T10:00:00Z
+    formatInstruction: "Format the summary for Slack messaging (use Slack markdown format)."
+    expected: Should highlight the review request as action needed, mention release in FYI
